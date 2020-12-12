@@ -1,0 +1,81 @@
+{
+  "name": "FileGroup",
+  "displayName": "File Group",
+  "description": "Keep groups of file paths and open them with one command",
+  "publisher": "rioj7",
+  "license": "MIT",
+  "version": "0.1.0",
+  "engines": {"vscode": "^1.49.3"},
+  "categories": ["Other"],
+  "keywords": ["open","group","files"],
+  "icon": "images/icon.png",
+  "galleryBanner": {"color": "#000080", "theme": "dark"},
+  "activationEvents": [
+    "onCommand:fileGroup.openGroup"
+  ],
+  "contributes": {
+    "configuration": {
+      "title": "File Group",
+      "properties": {
+        "fileGroup.groups": {
+          "type": "object",
+          "scope": "resource",
+          "default": {},
+          "description": "Collection of file groups, by key name",
+          "patternProperties": {
+            "^.*$": {
+              "type": "object",
+              "properties": {
+                "files": {
+                  "type": "array",
+                  "default": [],
+                  "description": "list with file paths",
+                  "items": { "type": "string" }
+                },
+                "label": {
+                  "type": "string",
+                  "description": "(Optional) Label to use in the QuickPick list for the command fileGroup.openGroup"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "(Optional) Description to use in the QuickPick list on the same line for the command fileGroup.openGroup"
+                },
+                "detail": {
+                  "type": "string",
+                  "description": "(Optional) Detail to use in the QuickPick list on a separate line for the command fileGroup.openGroup"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "commands":[
+      {
+        "command": "fileGroup.openGroup",
+        "title": "Open a File Group"
+      }
+    ],
+    "keybindings": [
+      { "command": "fileGroup.openGroup", "args": { "group": "1" }, "key": "ctrl+alt+1", "mac": "cmd+alt+1" },
+      { "command": "fileGroup.openGroup", "args": { "group": "2" }, "key": "ctrl+alt+2", "mac": "cmd+alt+2" },
+      { "command": "fileGroup.openGroup", "args": { "group": "3" }, "key": "ctrl+alt+3", "mac": "cmd+alt+3" },
+      { "command": "fileGroup.openGroup", "args": { "group": "4" }, "key": "ctrl+alt+4", "mac": "cmd+alt+4" },
+      { "command": "fileGroup.openGroup", "args": { "group": "5" }, "key": "ctrl+alt+5", "mac": "cmd+alt+5" },
+      { "command": "fileGroup.openGroup", "args": { "group": "6" }, "key": "ctrl+alt+6", "mac": "cmd+alt+6" },
+      { "command": "fileGroup.openGroup", "args": { "group": "7" }, "key": "ctrl+alt+7", "mac": "cmd+alt+7" },
+      { "command": "fileGroup.openGroup", "args": { "group": "8" }, "key": "ctrl+alt+8", "mac": "cmd+alt+8" },
+      { "command": "fileGroup.openGroup", "args": { "group": "9" }, "key": "ctrl+alt+9", "mac": "cmd+alt+9" },
+      { "command": "fileGroup.openGroup", "args": { "group": "0" }, "key": "ctrl+alt+0", "mac": "cmd+alt+0" }
+    ]
+  },
+  "main": "./extension.js",
+  "homepage": "https://github.com/rioj7/file-group",
+  "bugs": {
+    "url": "https://github.com/rioj7/file-group/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rioj7/file-group.git"
+  }
+}
