@@ -4,7 +4,7 @@
   "description": "Keep groups of file paths and open them with one command",
   "publisher": "rioj7",
   "license": "MIT",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "engines": {"vscode": "^1.49.3"},
   "categories": ["Other"],
   "keywords": ["open","group","files"],
@@ -70,12 +70,12 @@
     ]
   },
   "main": "./extension.js",
-  "homepage": "https://github.com/rioj7/file-group",
+  "homepage": "https://github.com/rioj7/fileGroup",
   "bugs": {
-    "url": "https://github.com/rioj7/file-group/issues"
+    "url": "https://github.com/rioj7/fileGroup/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/rioj7/file-group.git"
+    "url": "https://github.com/rioj7/fileGroup.git"
   }
 }
