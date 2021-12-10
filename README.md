@@ -67,6 +67,24 @@ For groups "1", "2", .... , "9", "0" there is a predefined key binding.
 
 The files will be opened in the current Active Column.
 
+## Special language keyboards
+
+Certain language keyboards use the `Ctrl+Alt+number` key combo for special characters.
+
+You can remove the predefined keybindings and define new ones yourself.
+
+Add this to the bottom of your `keybindings.json`
+
+```
+{ "command": "-fileGroup.openGroup", "key": "ctrl+alt+1"},
+{ "command": "fileGroup.openGroup", "args": { "group": "1" }, "key": "ctrl+alt+shift+1" }
+```
+
+Repeat this for the other keys `2...9,0`
+
+For macOS replace `Ctrl` with `Cmd`.
+
+
 # TODO
 
 * Add files to a group with the Editor context menu and File Explorer context menu
