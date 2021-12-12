@@ -3,7 +3,9 @@ const path = require('path');
 
 function activate(context) {
   const extensionShortName = 'fileGroup';
-  const isObject = obj => typeof obj === 'object';
+  const isString = obj => typeof obj === 'string';
+  const isArray = obj => Array.isArray(obj);
+  const isObject = obj => (typeof obj === 'object') && !isArray(obj);
   const getProperty = (obj, prop, deflt) => { return obj.hasOwnProperty(prop) ? obj[prop] : deflt; };
   // async function updateConfiguration(value, target) {
   //   // vscode.ConfigurationTarget.Workspace
@@ -32,6 +34,160 @@ function activate(context) {
         error => { vscode.window.showErrorMessage(String(error)); });
     });
     await Promise.all(group.files.map(openFile));
+  }) );
+  function getScripts() {
+    let config = vscode.workspace.getConfiguration(extensionShortName);
+    let scripts = config.get('scripts'); // there is always default value: {}
+    let found = [];
+    for (const name in scripts) {
+      if (Object.hasOwnProperty.call(scripts, name)) {
+        found.push( {name, config: scripts[name]} );
+      }
+    }
+    return found;
+  }
+  function checkScripts() {
+    vscode.commands.executeCommand('setContext', 'fileGroup:hasScripts', getScripts().length > 0);
+  }
+  function removeLast(src, part) {
+    let pos = src.lastIndexOf(part);
+    if (pos !== -1) { src = src.substring(0, pos); }
+    if (src.endsWith('/')) { src = src.substring(0, src.length-1); }
+    return src;
+  }
+  /** @param {vscode.Uri} fileUri */
+  function substVariables(v, fileUri) {
+    if (fileUri === undefined) { return v; }
+    let filePath = fileUri.fsPath;
+    let fileBasename = fileUri.path;
+    let pos = fileBasename.lastIndexOf('/');
+    if (pos !== -1) { fileBasename = fileBasename.substring(pos+1); }
+    let fileBasenameNoExtension = fileBasename;
+    let fileExtname = '';
+    pos = fileBasename.lastIndexOf('.');
+    if (pos !== -1) {
+      fileBasenameNoExtension = fileBasename.substring(0, pos);
+      fileExtname = fileBasename.substring(pos);
+    }
+    let fileDirname = removeLast(filePath, fileBasename);
+    let relativeFile = 'Unknown';
+    let fileWorkspaceFolder = 'Unknown';
+    let workspaceURI = vscode.workspace.getWorkspaceFolder(fileUri).uri;
+    if (workspaceURI) {
+      fileWorkspaceFolder = workspaceURI.fsPath;
+      if (fileUri.fsPath.indexOf(fileWorkspaceFolder) === 0) { relativeFile = fileUri.fsPath.substring(fileWorkspaceFolder.length+1); }
+    }
+    let relativeFileDirname = removeLast(relativeFile, fileBasename);
+    v = v.replace(/\$\{fileBasename\}/g, fileBasename);
+    v = v.replace(/\$\{fileBasenameNoExtension\}/g, fileBasenameNoExtension);
+    v = v.replace(/\$\{fileExtname\}/g, fileExtname);
+    v = v.replace(/\$\{relativeFile\}/g, relativeFile);
+    v = v.replace(/\$\{relativeFileDirname\}/g, relativeFileDirname);
+    v = v.replace(/\$\{file\}/g, filePath);
+    v = v.replace(/\$\{fileDirname\}/g, fileDirname);
+    v = v.replace(/\$\{fileWorkspaceFolder\}/g, fileWorkspaceFolder);
+    return v;
+  }
+  /** @param {vscode.Uri} uri */
+  function processVariables(v, uri) {
+    if (isArray(v)) { return v.map(e => processVariables(e, uri)); }
+    if (isObject(v)) {
+      let v1 = {};
+      Object.keys(v).forEach(p => { v1[p] = processVariables(v[p], uri); });
+      return v1;
+    }
+    if (isString(v)) { return substVariables(v, uri); }
+    return v;
+  }
+  /** @param {Array} sequence @param {vscode.Uri} [uri] */
+  function processStep(step, sequence, uri) {
+    let command = getProperty(step, 'command');
+    let args = getProperty(step, 'args');
+    if (command === undefined) { return; }
+    if (args === undefined) {
+      sequence.push(command)
+      return;
+    }
+    args = processVariables(args, uri);
+    sequence.push({command, args});
+  }
+  context.subscriptions.push(vscode.workspace.onDidChangeConfiguration( async configevent => {
+    if (configevent.affectsConfiguration(extensionShortName)) { checkScripts(); }
+  }));
+  checkScripts();
+  let recentlyUsedScript = [];
+  // https://stackoverflow.com/a/70307717/9938317  All selected files from explorer context menu
+  context.subscriptions.push(vscode.commands.registerCommand('fileGroup.script', async (...args) => {
+    if (!args) { return; }
+    let scripts = getScripts();
+    if (scripts.length == 0) {
+      vscode.window.showInformationMessage('no script found');
+      return;
+    }
+    if (args.length === 1) {  // from keybinding
+      return;
+    }
+    let scriptKey = await new Promise(resolve => {
+      let qpItems = [];
+      for (const scr of scripts) {
+        let {name, config} = scr;
+        let label = getProperty(config, 'label', name);
+        let description = getProperty(config, 'description');
+        let detail = getProperty(config, 'detail');
+        qpItems.push( { idx: qpItems.length, scriptKey: name, label, description, detail } );
+      }
+      const sortIndex = a => {
+        let idx = recentlyUsedScript.findIndex( e => e === a.scriptKey );
+        return idx >= 0 ? idx : recentlyUsedScript.length + a.idx;
+      };
+      qpItems.sort( (a, b) => sortIndex(a) - sortIndex(b) );
+      resolve(vscode.window.showQuickPick(qpItems)
+        .then( item => {
+          if (item) {
+            let scriptKey = item.scriptKey;
+            recentlyUsedScript = [scriptKey].concat(recentlyUsedScript.filter( e => e !== scriptKey ));
+          }
+          return item;
+      }));
+    }).then( item => {
+      if (isString(item)) return item;
+      return item ? item.scriptKey : undefined;
+    });
+    if (scriptKey === undefined) { return; }
+    let scriptConfig = scripts.find( e => e.name === scriptKey ).config;
+    let script = getProperty(scriptConfig, 'script');
+    if (script === undefined || !isArray(script) || script.length === 0) { return; }
+    let fileURIs = args[1].slice(); // shallow copy
+    let sequence = [];
+    let argsMulticommand = {};
+    argsMulticommand.sequence = sequence;
+    let interval = getProperty(scriptConfig, 'interval');
+    if (interval !== undefined) { argsMulticommand.interval = interval; }
+    for (const step of script) {
+      let fileprop = getProperty(step, 'file');
+      let flags = getProperty(step, 'flags');
+      if (fileprop !== undefined) {
+        let [count,regex] = fileprop.split(';');
+        if (count === '') {
+          vscode.window.showInformationMessage('unknown file count, valid: "all" or a number');
+          return;
+        }
+        let [number,keep] = count.split(':');
+        keep = keep === 'keep';
+        if (number === 'all') { number = fileURIs.length; }
+        number = Number(number);
+        if (regex === undefined || regex === '') { regex = '.*'; }
+        regex = new RegExp(regex, flags);
+        let fileUseURI = fileURIs.filter(f => regex.test(f.path)).slice(0, number);
+        fileUseURI.forEach(uri => { processStep(step, sequence, uri); });
+        if (!keep) {
+          fileURIs = fileURIs.filter( e => fileUseURI.every( f => f.path !== e.path) );
+        }
+      } else {
+        processStep(step, sequence);
+      }
+    }
+    vscode.commands.executeCommand('extension.multiCommand.execute', argsMulticommand);
   }) );
 };
 

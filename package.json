@@ -4,15 +4,13 @@
   "description": "Keep groups of file paths and open them with one command",
   "publisher": "rioj7",
   "license": "MIT",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "engines": {"vscode": "^1.49.3"},
   "categories": ["Other"],
   "keywords": ["open","group","files"],
   "icon": "images/icon.png",
   "galleryBanner": {"color": "#000080", "theme": "dark"},
-  "activationEvents": [
-    "onCommand:fileGroup.openGroup"
-  ],
+  "activationEvents": [ "*" ],
   "contributes": {
     "configuration": {
       "title": "File Group",
@@ -47,6 +45,61 @@
               }
             }
           }
+        },
+        "fileGroup.scripts": {
+          "type": "object",
+          "scope": "resource",
+          "default": {},
+          "description": "Collection of file group scripts, by key name",
+          "patternProperties": {
+            "^.*$": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "description": "(Optional) Label to use in the QuickPick list for the command fileGroup.script"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "(Optional) Description to use in the QuickPick list on the same line for the command fileGroup.script"
+                },
+                "detail": {
+                  "type": "string",
+                  "description": "(Optional) Detail to use in the QuickPick list on a separate line for the command fileGroup.script"
+                },
+                "interval": {
+                  "type":"integer",
+                  "description": "(Optional) time interval between each command execution (in miliseconds)"
+                },
+                "script": {
+                  "type": "array",
+                  "description": "Array of script steps, a step can process 0 or more files",
+                  "default": [],
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "file": {
+                        "type": "string",
+                        "description": "(Optional) which file(s) should be handled"
+                      },
+                      "flags": {
+                        "type": "string",
+                        "description": "(Optional) regex flags used to match the file path"
+                      },
+                      "command": {
+                        "type": "string",
+                        "description": "The command to execute"
+                      },
+                      "args": {
+                        "description": "(Optional) The argument for the command"
+                      }
+                    },
+                    "required": ["command"]
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -54,6 +107,10 @@
       {
         "command": "fileGroup.openGroup",
         "title": "Open a File Group"
+      },
+      {
+        "command": "fileGroup.script",
+        "title": "Open File Group with a script"
       }
     ],
     "keybindings": [
@@ -67,9 +124,22 @@
       { "command": "fileGroup.openGroup", "args": { "group": "8" }, "key": "ctrl+alt+8", "mac": "cmd+alt+8" },
       { "command": "fileGroup.openGroup", "args": { "group": "9" }, "key": "ctrl+alt+9", "mac": "cmd+alt+9" },
       { "command": "fileGroup.openGroup", "args": { "group": "0" }, "key": "ctrl+alt+0", "mac": "cmd+alt+0" }
-    ]
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "fileGroup.script",
+          "group": "2_workspace@9",
+          "when": "fileGroup:hasScripts"
+        }
+      ],
+      "commandPalette": [
+        { "command": "fileGroup.script", "when": "false" }
+      ]
+    }
   },
   "main": "./extension.js",
+  "extensionDependencies": ["ryuta46.multi-command", "rioj7.html-related-links"],
   "homepage": "https://github.com/rioj7/fileGroup",
   "bugs": {
     "url": "https://github.com/rioj7/fileGroup/issues"
