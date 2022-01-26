@@ -1,16 +1,76 @@
 const vscode = require('vscode');
 const path = require('path');
 
+const extensionShortName = 'fileGroup';
+const isString = obj => typeof obj === 'string';
+const isArray = obj => Array.isArray(obj);
+const isObject = obj => (typeof obj === 'object') && !isArray(obj);
+const getProperty = (obj, prop, deflt) => { return obj.hasOwnProperty(prop) ? obj[prop] : deflt; };
+
+class FileGroupProvider {
+  constructor() {
+    this._onDidChangeTreeData = new vscode.EventEmitter();
+    this.onDidChangeTreeData = this._onDidChangeTreeData.event;
+    this.content = {};
+  }
+  refresh() {
+    this._onDidChangeTreeData.fire(0);
+  }
+  getTreeItem(element) {
+    return element;
+  }
+  getChildren(element) {
+    if (element === undefined) {
+      let config = vscode.workspace.getConfiguration(extensionShortName);
+      let groups = config.get('groups'); // there is always default value: {}
+      let groupItems = [];
+      this.content = {};
+      for (const prop in groups) {
+        if (!groups.hasOwnProperty(prop)) { continue; }
+        this.content[prop] = [].concat(getProperty(groups[prop], 'files', []));
+        groupItems.push(new FileGroupItem({label_uri: prop, contextValue:'fgGroup'}, vscode.TreeItemCollapsibleState.Collapsed))
+      }
+      return Promise.resolve(groupItems);
+    }
+    return Promise.resolve(this.content[element.label].map(x => new FileGroupItem({label_uri: vscode.Uri.file(x)})));
+  }
+}
+class FileGroupItem extends vscode.TreeItem {
+  constructor(itemObj, collapsibleState) {
+    super(itemObj.label_uri, collapsibleState);
+    this.iconPath = undefined;
+    this.description = true; // use resource URI
+    this.contextValue = itemObj.contextValue; // used for menu entries
+  }
+}
+
 function activate(context) {
-  const extensionShortName = 'fileGroup';
-  const isString = obj => typeof obj === 'string';
-  const isArray = obj => Array.isArray(obj);
-  const isObject = obj => (typeof obj === 'object') && !isArray(obj);
-  const getProperty = (obj, prop, deflt) => { return obj.hasOwnProperty(prop) ? obj[prop] : deflt; };
   // async function updateConfiguration(value, target) {
   //   // vscode.ConfigurationTarget.Workspace
   //   await vscode.workspace.getConfiguration().update(section, value, target);
   // }
+  const fileGroupProvider = new FileGroupProvider();
+  vscode.window.registerTreeDataProvider('fileGroup', fileGroupProvider);
+  context.subscriptions.push(vscode.commands.registerCommand('fileGroup.refreshView', () => {
+    fileGroupProvider.refresh();
+  }) );
+  context.subscriptions.push(vscode.commands.registerCommand('fileGroup.openGroupColActive', (...args) => {
+    vscode.commands.executeCommand('fileGroup.openGroup', { group: args[0].label, column: -1 });
+  }) );
+  context.subscriptions.push(vscode.commands.registerCommand('fileGroup.openGroupColSplit', (...args) => {
+    let editor = vscode.window.activeTextEditor;
+    let viewColumn = 1;
+    if (editor) { viewColumn = editor.viewColumn === 1 ? 2 : 1; }
+    vscode.commands.executeCommand('fileGroup.openGroup', { group: args[0].label, column: viewColumn });
+  }) );
+  context.subscriptions.push(vscode.commands.registerCommand('fileGroup.openGroupColSide', (...args) => {
+    vscode.commands.executeCommand('fileGroup.openGroup', { group: args[0].label, column: -2 });
+  }) );
+  for (let i = 1; i < 5; ++i) {
+    context.subscriptions.push(vscode.commands.registerCommand(`fileGroup.openGroupCol${i}`, (...args) => {
+      vscode.commands.executeCommand('fileGroup.openGroup', { group: args[0].label, column: i });
+    }) );
+  }
   context.subscriptions.push(vscode.commands.registerCommand('fileGroup.openGroup', async (args) => {
     let groupName = undefined;
     let column = vscode.ViewColumn.Active;

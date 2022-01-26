@@ -105,6 +105,18 @@ Repeat this for the other keys `2...9,0`
 
 For macOS replace `Ctrl` with `Cmd`.
 
+## File Group View
+
+In the Explorer Bar is a View that shows the groups found in the setting `fileGroup.groups`.
+
+![File Group View](images/view.png)
+
+You can open the group with the buttons on the group item and with the context menu of the group item.
+
+If you have modified the setting press the **Refresh** button at the top of the File Group view.
+
+To Show/Hide the View use the `...` menu at the top of the Explorer Bar.
+
 # Scripts on File Groups
 
 When you select a number of files in the File Explorer you have the command **Open File Group with a script** in the context menu (right click). Only if there are scripts defined.
@@ -146,6 +158,13 @@ An example: If I select HTML, CSS and JavaScript files I can open them each in a
 
 We have to set an `interval` because it takes time to load the file.
 
+# Release Notes
+
+### v1.0.0
+* File Group View
+
+### v0.3.0
+* Scripts for file groups
 
 # TODO
 
