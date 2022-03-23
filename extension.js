@@ -89,11 +89,12 @@ function activate(context) {
       vscode.window.showInformationMessage(`group not found: ${groupName}`);
       return;
     }
-    const openFile = filePath => new Promise(resolve => {
+    const openFile = filePath => new Promise((resolve, reject) => {
       vscode.window.showTextDocument(vscode.Uri.file(filePath), { preview: false, viewColumn: column }).then( editor => { resolve(true); },
-        error => { vscode.window.showErrorMessage(String(error)); });
+        error => { vscode.window.showErrorMessage(String(error)); reject(error); });
     });
-    await Promise.all(group.files.map(openFile));
+    for (const file of group.files) { await openFile(file).catch( () => {} ); }  // some systems have trouble opening the files in parallel
+    // await Promise.all(group.files.map(openFile));
   }) );
   function getScripts() {
     let config = vscode.workspace.getConfiguration(extensionShortName);

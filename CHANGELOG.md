@@ -3,6 +3,10 @@
 ## [Unreleased]
 ### Added
 
+## [1.0.2] 2022-03-23
+### Changed
+- file loading is done sequential
+
 ## [1.0.1] 2022-03-09
 ### Added
 - CHANGELOG.md
