@@ -1,7 +1,8 @@
 # Change Log
 
-## [Unreleased]
-### Added
+## [1.0.3] 2022-09-01
+### Changed
+- README: how to use with remote workspaces
 
 ## [1.0.2] 2022-03-23
 ### Changed

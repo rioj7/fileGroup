@@ -4,7 +4,7 @@
   "description": "Keep groups of file paths and open them with one command",
   "publisher": "rioj7",
   "license": "MIT",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "engines": {"vscode": "^1.49.3"},
   "categories": ["Other"],
   "keywords": ["open","group","files"],

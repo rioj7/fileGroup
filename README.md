@@ -1,4 +1,4 @@
-# fileGroup
+# File Group
 
 This VSCode extension enables you to open a group of files with 1 command or Key binding.
 
@@ -61,6 +61,28 @@ An example `settings.json`:
         ]
       }
 ```
+
+### Remote workspaces
+
+This extension depends on the extension [multi-command](https://marketplace.visualstudio.com/items?itemName=ryuta46.multi-command) to execute the scripts. If you want to work with a remote workspace you get an error message:
+
+> Cannot activate the 'File Group' extension because it depends on the 'multi-command' extension, which is not loaded.
+
+The reason multi-command is not run on the remote host is because the extension `package.json` states that it prefers to run on the UI side. I see no reason why I would run multi-command in the UI.
+
+You can override that behavior by setting `remote.extensionKind`.
+
+Add this to your Global/User `settings.json` of the **local VSC** (when remote is not connected)
+
+```
+  "remote.extensionKind": {
+    "ryuta46.multi-command": ["workspace"]
+  }
+```
+
+Now you can install File Group on the remote and it should be enabled.
+
+VSC doc: [Advanced: Forcing an extension to run locally / remotely](https://code.visualstudio.com/docs/remote/ssh#_advanced-forcing-an-extension-to-run-locally-remotely)
 
 ## Keybindings
 
