@@ -32,7 +32,7 @@ class FileGroupProvider {
       }
       return Promise.resolve(groupItems);
     }
-    return Promise.resolve(this.content[element.label].map(x => new FileGroupItem({label_uri: vscode.Uri.file(x)})));
+    return Promise.resolve(this.content[element.label].map(x => new FileGroupItem({label_uri: vscode.Uri.file(x), contextValue:'fgFile'})));
   }
 }
 class FileGroupItem extends vscode.TreeItem {
@@ -54,14 +54,24 @@ function activate(context) {
   context.subscriptions.push(vscode.commands.registerCommand('fileGroup.refreshView', () => {
     fileGroupProvider.refresh();
   }) );
+  function splitViewColumn() {
+    let editor = vscode.window.activeTextEditor;
+    let viewColumn = 1;
+    if (editor) { viewColumn = editor.viewColumn === 1 ? 2 : 1; }
+    return viewColumn;
+  }
+  async function openFiles(files, column) {
+    const openFile = filePath => new Promise((resolve, reject) => {
+      vscode.window.showTextDocument(vscode.Uri.file(filePath), { preview: false, viewColumn: column }).then( editor => { resolve(true); },
+        error => { vscode.window.showErrorMessage(String(error)); reject(error); });
+    });
+    for (const file of files) { await openFile(file).catch( () => {} ); }  // VSC loads files sequencially
+  }
   context.subscriptions.push(vscode.commands.registerCommand('fileGroup.openGroupColActive', (...args) => {
     vscode.commands.executeCommand('fileGroup.openGroup', { group: args[0].label, column: -1 });
   }) );
   context.subscriptions.push(vscode.commands.registerCommand('fileGroup.openGroupColSplit', (...args) => {
-    let editor = vscode.window.activeTextEditor;
-    let viewColumn = 1;
-    if (editor) { viewColumn = editor.viewColumn === 1 ? 2 : 1; }
-    vscode.commands.executeCommand('fileGroup.openGroup', { group: args[0].label, column: viewColumn });
+    vscode.commands.executeCommand('fileGroup.openGroup', { group: args[0].label, column: splitViewColumn() });
   }) );
   context.subscriptions.push(vscode.commands.registerCommand('fileGroup.openGroupColSide', (...args) => {
     vscode.commands.executeCommand('fileGroup.openGroup', { group: args[0].label, column: -2 });
@@ -89,13 +99,25 @@ function activate(context) {
       vscode.window.showInformationMessage(`group not found: ${groupName}`);
       return;
     }
-    const openFile = filePath => new Promise((resolve, reject) => {
-      vscode.window.showTextDocument(vscode.Uri.file(filePath), { preview: false, viewColumn: column }).then( editor => { resolve(true); },
-        error => { vscode.window.showErrorMessage(String(error)); reject(error); });
-    });
-    for (const file of group.files) { await openFile(file).catch( () => {} ); }  // some systems have trouble opening the files in parallel
-    // await Promise.all(group.files.map(openFile));
+    await openFiles(group.files, column);
   }) );
+  async function openFgFile(filePath, column) {
+    return openFiles([filePath], column)
+  }
+  context.subscriptions.push(vscode.commands.registerCommand('fileGroup.openFileColActive', async (...args) => {
+    await openFgFile(args[0].resourceUri.fsPath, -1 );
+  }) );
+  context.subscriptions.push(vscode.commands.registerCommand('fileGroup.openFileColSplit', async (...args) => {
+    await openFgFile(args[0].resourceUri.fsPath, splitViewColumn() );
+  }) );
+  context.subscriptions.push(vscode.commands.registerCommand('fileGroup.openFileColSide', async (...args) => {
+    await openFgFile(args[0].resourceUri.fsPath, -2 );
+  }) );
+  for (let i = 1; i < 5; ++i) {
+    context.subscriptions.push(vscode.commands.registerCommand(`fileGroup.openFileCol${i}`, async (...args) => {
+      await openFgFile(args[0].resourceUri.fsPath, i );
+    }) );
+  }
   function getScripts() {
     let config = vscode.workspace.getConfiguration(extensionShortName);
     let scripts = config.get('scripts'); // there is always default value: {}

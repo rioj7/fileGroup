@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.1.0] 2022-12-14
+### Added
+- Open single file from group
+
 ## [1.0.3] 2022-09-01
 ### Changed
 - README: how to use with remote workspaces

@@ -62,7 +62,7 @@ An example `settings.json`:
       }
 ```
 
-### Remote workspaces
+## Remote workspaces
 
 This extension depends on the extension [multi-command](https://marketplace.visualstudio.com/items?itemName=ryuta46.multi-command) to execute the scripts. If you want to work with a remote workspace you get an error message:
 
@@ -131,13 +131,15 @@ Repeat this for the other keys `2...9,0`
 
 For macOS replace `Ctrl` with `Cmd`.
 
-### File Group View
+## File Group View
 
 In the Explorer Bar is a View that shows the groups found in the setting `fileGroup.groups`.
 
 ![File Group View](images/view.png)
 
 You can open the group with the buttons on the group item and with the context menu of the group item.
+
+You can open an individual file with the buttons on the file item and with the context menu of the file item.
 
 If you have modified the setting press the **Refresh** button at the top of the File Group view.
 

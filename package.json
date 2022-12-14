@@ -143,6 +143,37 @@
         "title": "Open File Group in Column 4"
       },
       {
+        "command": "fileGroup.openFileColActive",
+        "title": "Open File in Active Column",
+        "icon": "$(file)"
+      },
+      {
+        "command": "fileGroup.openFileColSplit",
+        "title": "Open File in Split Column",
+        "icon": "$(split-horizontal)"
+      },
+      {
+        "command": "fileGroup.openFileColSide",
+        "title": "Open File in Side Column"
+      },
+      {
+        "command": "fileGroup.openFileCol1",
+        "title": "Open File in Column 1"
+      },
+      {
+        "command": "fileGroup.openFileCol2",
+        "title": "Open File in Column 2"
+      },
+      {
+        "command": "fileGroup.openFileCol3",
+        "title": "Open File in Column 3"
+      },
+      {
+        "command": "fileGroup.openFileCol4",
+        "title": "Open File in Column 4"
+      },
+
+      {
         "command": "fileGroup.refreshView",
         "title": "Refresh",
         "icon": "$(refresh)"
@@ -184,7 +215,14 @@
         { "command": "fileGroup.openGroupCol1", "when": "false" },
         { "command": "fileGroup.openGroupCol2", "when": "false" },
         { "command": "fileGroup.openGroupCol3", "when": "false" },
-        { "command": "fileGroup.openGroupCol4", "when": "false" }
+        { "command": "fileGroup.openGroupCol4", "when": "false" },
+        { "command": "fileGroup.openFileColActive", "when": "false" },
+        { "command": "fileGroup.openFileColSplit", "when": "false" },
+        { "command": "fileGroup.openFileColSide", "when": "false" },
+        { "command": "fileGroup.openFileCol1", "when": "false" },
+        { "command": "fileGroup.openFileCol2", "when": "false" },
+        { "command": "fileGroup.openFileCol3", "when": "false" },
+        { "command": "fileGroup.openFileCol4", "when": "false" }
       ],
       "view/title": [
         {
@@ -237,6 +275,51 @@
         {
           "command": "fileGroup.openGroupColSide",
           "when": "view == fileGroup && viewItem == fgGroup",
+          "group": "fg@7"
+        },
+        {
+          "command": "fileGroup.openFileColActive",
+          "when": "view == fileGroup && viewItem == fgFile",
+          "group": "inline"
+        },
+        {
+          "command": "fileGroup.openFileColSplit",
+          "when": "view == fileGroup && viewItem == fgFile",
+          "group": "inline"
+        },
+        {
+          "command": "fileGroup.openFileColActive",
+          "when": "view == fileGroup && viewItem == fgFile",
+          "group": "fg@1"
+        },
+        {
+          "command": "fileGroup.openFileColSplit",
+          "when": "view == fileGroup && viewItem == fgFile",
+          "group": "fg@2"
+        },
+        {
+          "command": "fileGroup.openFileCol1",
+          "when": "view == fileGroup && viewItem == fgFile",
+          "group": "fg@3"
+        },
+        {
+          "command": "fileGroup.openFileCol2",
+          "when": "view == fileGroup && viewItem == fgFile",
+          "group": "fg@4"
+        },
+        {
+          "command": "fileGroup.openFileCol3",
+          "when": "view == fileGroup && viewItem == fgFile",
+          "group": "fg@5"
+        },
+        {
+          "command": "fileGroup.openFileCol4",
+          "when": "view == fileGroup && viewItem == fgFile",
+          "group": "fg@6"
+        },
+        {
+          "command": "fileGroup.openFileColSide",
+          "when": "view == fileGroup && viewItem == fgFile",
           "group": "fg@7"
         }
       ]
