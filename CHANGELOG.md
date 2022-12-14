@@ -3,6 +3,7 @@
 ## [1.1.0] 2022-12-14
 ### Added
 - Open single file from group
+- Use <code>&dollar;{workspaceFolder}</code> or <code>&dollar;{workspaceFolder:<em>name</em>}</code> to describe relative file in group
 
 ## [1.0.3] 2022-09-01
 ### Changed

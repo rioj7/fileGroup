@@ -11,9 +11,16 @@ Select files in the File Explorer and apply a command script on the file paths.
 * `fileGroup.groups`: Definition of the different groups. It is an object with the following fields:
     * the key for the group can have any name
     * the parameters for each group are
-        * `files`: an array with the full file paths, OS versions
+        * `files`: an array with the file paths  
+          A file path can be:  
+          * an absolute full file paths, OS versions
+          * a relative path using variable (use `/` as separator):  
+            * <code>&dollar;{workspaceFolder}</code> : relative to the single open workspace
+            * <code>&dollar;{workspaceFolder:<em>name</em>}</code> : relative to the Multi Root Workspace with the given name
 
     A good location to store this is in the User `settings.json`. This will not influence your team members.
+
+    If you use the <code>&dollar;{workspaceFolder:<em>name</em>}</code> variable it is best to store the file group in the `.code-workspace` file. If not you can get a lot of "Workspace not found" messages when you unfold the group name.
 
     If you store this in the WorkspaceFolder settings there are 2 cases:
 
@@ -191,4 +198,3 @@ We have to set an `interval` because it takes time to load the file.
 * Add files to a group with the Editor context menu and File Explorer context menu
 * Remove files from a group with the Editor context menu and File Explorer context menu
 * a quick pick list of the currently defined groups with label/detail/description
-* support relative file paths, but which workspaceFolder to use

@@ -6,6 +6,44 @@ const isString = obj => typeof obj === 'string';
 const isArray = obj => Array.isArray(obj);
 const isObject = obj => (typeof obj === 'object') && !isArray(obj);
 const getProperty = (obj, prop, deflt) => { return obj.hasOwnProperty(prop) ? obj[prop] : deflt; };
+function dblQuest(value, deflt) { return value !== undefined ? value : deflt; }
+function errorMessage(msg, noObject) { vscode.window.showErrorMessage(msg); return noObject ? noObject : "Unknown";}
+
+function getNamedWorkspaceFolder(name) {
+  const folders = dblQuest(vscode.workspace.workspaceFolders, []);
+  if (folders.length === 0) {
+    errorMessage('No Workspace Folder');
+    return undefined;
+  }
+  if (!name) {
+    if (folders.length === 1) { return folders[0]; }
+    errorMessage('Use the name of the Workspace Folder in the variable');
+    return undefined;
+  }
+  let filterPred = w => w.name === name;
+  if (name.indexOf('/') >= 0) { filterPred = w => w.uri.path.endsWith(name); }
+  let wsfLst = folders.filter(filterPred);
+  if (wsfLst.length === 0) {
+    errorMessage(`Workspace not found with name: ${name}`);
+    return undefined;
+  }
+  return wsfLst[0];
+}
+function getNamedWorkspaceFolderFsPath(name) {
+  let wsf = getNamedWorkspaceFolder(name);
+  if (!wsf) { return 'Unknown'; }
+  return wsf.uri.fsPath;
+}
+/** @param {string} v */
+function substVariablesView(v) {
+  v = v.replace(/\$\{workspaceFolder\}/g, m => {
+    return getNamedWorkspaceFolderFsPath();
+  });
+  v = v.replace(/\$\{workspaceFolder:(.+?)\}/g, (m, p1) => {
+    return getNamedWorkspaceFolderFsPath(p1);
+  });
+  return v;
+}
 
 class FileGroupProvider {
   constructor() {
@@ -32,7 +70,7 @@ class FileGroupProvider {
       }
       return Promise.resolve(groupItems);
     }
-    return Promise.resolve(this.content[element.label].map(x => new FileGroupItem({label_uri: vscode.Uri.file(x), contextValue:'fgFile'})));
+    return Promise.resolve(this.content[element.label].map(x => new FileGroupItem({label_uri: vscode.Uri.file(substVariablesView(x)), contextValue:'fgFile'})));
   }
 }
 class FileGroupItem extends vscode.TreeItem {
@@ -62,7 +100,7 @@ function activate(context) {
   }
   async function openFiles(files, column) {
     const openFile = filePath => new Promise((resolve, reject) => {
-      vscode.window.showTextDocument(vscode.Uri.file(filePath), { preview: false, viewColumn: column }).then( editor => { resolve(true); },
+      vscode.window.showTextDocument(vscode.Uri.file(substVariablesView(filePath)), { preview: false, viewColumn: column }).then( editor => { resolve(true); },
         error => { vscode.window.showErrorMessage(String(error)); reject(error); });
     });
     for (const file of files) { await openFile(file).catch( () => {} ); }  // VSC loads files sequencially
@@ -138,7 +176,7 @@ function activate(context) {
     if (src.endsWith('/')) { src = src.substring(0, src.length-1); }
     return src;
   }
-  /** @param {vscode.Uri} fileUri */
+  /** @param {string} v @param {vscode.Uri} fileUri */
   function substVariables(v, fileUri) {
     if (fileUri === undefined) { return v; }
     let filePath = fileUri.fsPath;
