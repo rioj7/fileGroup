@@ -6,6 +6,8 @@ By defining one or more groups of file paths you can open them together with 1 K
 
 Select files in the File Explorer and apply a command script on the file paths.
 
+If you have an editor with file paths, 1 per line, open them all or make (Multi Cursor) selection. Or pass the selected file paths to a command script.
+
 ## Extension Settings
 
 * `fileGroup.groups`: Definition of the different groups. It is an object with the following fields:
@@ -152,9 +154,9 @@ If you have modified the setting press the **Refresh** button at the top of the 
 
 To Show/Hide the View use the `...` menu at the top of the Explorer Bar.
 
-## Scripts on File Groups
+## Scripts on Seleted Files in File Explorer
 
-When you select a number of files in the File Explorer you have the command **Open File Group with a script** in the context menu (right click). Only if there are scripts defined.
+When you select a number of files in the File Explorer you have the command **File Group: Open Files with a script** in the context menu (right click). Only if there are scripts defined.
 
 You choose a defined script from a Quick Pick list.
 
@@ -166,7 +168,7 @@ Both extensions are set as dependencies and will be installed if you don't have 
 
 An example: If I select HTML, CSS and JavaScript files I can open them each in a separate group/editor:
 
-```
+```json
   "fileGroup.scripts": {
     "open side by side (HTML,CSS,*)": {
       "script": [
@@ -192,6 +194,35 @@ An example: If I select HTML, CSS and JavaScript files I can open them each in a
 ```
 
 We have to set an `interval` because it takes time to load the file.
+
+## Editor with File Paths
+
+There are several ways ways you can get a number of file paths in an editor
+
+* Execute a task that produces a file with file paths
+* Copy some part of a terminal output
+* . . . .
+
+If you have an empty selection, just a cursor, the whole editor content is used. And every line is considered a file path.
+
+If you don't want to use all the file paths or there is some other text in the editor make a (Multi Cursor) selection. All selections are combined with line breaks (`\n`) before being split to individual lines.
+
+You can then execute a command from the Command Palette or the editor context menu (right click).
+
+If you have a selection and use the editor context menu, right click **inside** the selection. Otherwise you lose the selection and the whole file is used.
+
+The possible commands are:
+
+* **File Group: Open Files in Active Column**
+* **File Group: Open Files in Split Column**
+* **File Group: Open Files in Side Column**
+* **File Group: Open Files in Column 1**
+* **File Group: Open Files in Column 2**
+* **File Group: Open Files in Column 3**
+* **File Group: Open Files in Column 4**
+* **File Group: Open Files with script**
+
+A file path can contain [variables](https://code.visualstudio.com/docs/editor/variables-reference). The variables supported are `${fileBasename}`, `${fileBasenameNoExtension}`, `${fileExtname}`, `${relativeFile}`, `${relativeFileDirname}`, `${file}`, `${fileDirname}`, `${fileWorkspaceFolder}`, <code>&dollar;{workspaceFolder}</code>, <code>&dollar;{workspaceFolder:<em>name</em>}</code>. The `${(relative)file....}` variables refer to the file path of the active editor file.
 
 ## TODO
 

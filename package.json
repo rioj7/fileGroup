@@ -4,7 +4,7 @@
   "description": "Keep groups of file paths and open them with one command",
   "publisher": "rioj7",
   "license": "MIT",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "engines": {"vscode": "^1.62.0"},
   "categories": ["Other"],
   "keywords": ["open","group","files"],
@@ -110,7 +110,7 @@
       },
       {
         "command": "fileGroup.script",
-        "title": "Open File Group with a script"
+        "title": "File Group: Open Files with a script"
       },
       {
         "command": "fileGroup.openGroupColActive",
@@ -177,6 +177,47 @@
         "command": "fileGroup.refreshView",
         "title": "Refresh",
         "icon": "$(refresh)"
+      },
+
+      {
+        "command": "fileGroup.openEditorSelectionFilesColActive",
+        "title": "Open Files in Active Column",
+        "category": "File Group"
+      },
+      {
+        "command": "fileGroup.openEditorSelectionFilesColSplit",
+        "title": "Open Files in Split Column",
+        "category": "File Group"
+      },
+      {
+        "command": "fileGroup.openEditorSelectionFilesColSide",
+        "title": "Open Files in Side Column",
+        "category": "File Group"
+      },
+      {
+        "command": "fileGroup.openEditorSelectionFilesCol1",
+        "title": "Open Files in Column 1",
+        "category": "File Group"
+      },
+      {
+        "command": "fileGroup.openEditorSelectionFilesCol2",
+        "title": "Open Files in Column 2",
+        "category": "File Group"
+      },
+      {
+        "command": "fileGroup.openEditorSelectionFilesCol3",
+        "title": "Open Files in Column 3",
+        "category": "File Group"
+      },
+      {
+        "command": "fileGroup.openEditorSelectionFilesCol4",
+        "title": "Open Files in Column 4",
+        "category": "File Group"
+      },
+      {
+        "command": "fileGroup.openEditorSelectionFilesScript",
+        "title": "Open Files with script",
+        "category": "File Group"
       }
     ],
     "keybindings": [
@@ -200,6 +241,41 @@
       ]
     },
     "menus": {
+      "editor/context": [
+        {
+          "command": "fileGroup.openEditorSelectionFilesColActive",
+          "group": "fileGroup@1"
+        },
+        {
+          "command": "fileGroup.openEditorSelectionFilesColSplit",
+          "group": "fileGroup@2"
+        },
+        {
+          "command": "fileGroup.openEditorSelectionFilesColSide",
+          "group": "fileGroup@3"
+        },
+        {
+          "command": "fileGroup.openEditorSelectionFilesCol1",
+          "group": "fileGroup@4"
+        },
+        {
+          "command": "fileGroup.openEditorSelectionFilesCol2",
+          "group": "fileGroup@5"
+        },
+        {
+          "command": "fileGroup.openEditorSelectionFilesCol3",
+          "group": "fileGroup@6"
+        },
+        {
+          "command": "fileGroup.openEditorSelectionFilesCol4",
+          "group": "fileGroup@7"
+        },
+        {
+          "command": "fileGroup.openEditorSelectionFilesScript",
+          "group": "fileGroup@8",
+          "when": "fileGroup:hasScripts"
+        }
+      ],
       "explorer/context": [
         {
           "command": "fileGroup.script",

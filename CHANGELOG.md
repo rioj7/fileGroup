@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.2.0] 2023-04-22
+### Added
+- read file paths to open or script from current editor (selection), evaluate variables
+
 ## [1.1.0] 2022-12-14
 ### Added
 - Open single file from group

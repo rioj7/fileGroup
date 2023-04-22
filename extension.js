@@ -140,7 +140,7 @@ function activate(context) {
     await openFiles(group.files, column);
   }) );
   async function openFgFile(filePath, column) {
-    return openFiles([filePath], column)
+    return openFiles([filePath], column);
   }
   context.subscriptions.push(vscode.commands.registerCommand('fileGroup.openFileColActive', async (...args) => {
     await openFgFile(args[0].resourceUri.fsPath, -1 );
@@ -156,6 +156,45 @@ function activate(context) {
       await openFgFile(args[0].resourceUri.fsPath, i );
     }) );
   }
+  function getEditorSelectionFiles() {
+    let editor = vscode.window.activeTextEditor;
+    if (!editor) { return undefined; }
+    let selectedText = editor.selections.filter(s => !s.isEmpty)
+        .map(s => editor.document.getText(s) )
+        .join('\n').replace('\r', '');
+    if (selectedText.length === 0) {
+      selectedText = editor.document.getText().replace('\r', '');
+    }
+    selectedText = substVariablesView(selectedText);
+    selectedText = substVariables(selectedText, editor.document.uri);
+    let filePaths = selectedText.split('\n').filter(s => s.length > 0);
+    return filePaths.length == 0 ? undefined : filePaths;
+  }
+  async function openEditorSelectionFiles(column) {
+    let filePaths = getEditorSelectionFiles();
+    if (!filePaths) { return; }
+    return openFiles(filePaths, column);
+  }
+  context.subscriptions.push(vscode.commands.registerCommand('fileGroup.openEditorSelectionFilesColActive', async (...args) => {
+    await openEditorSelectionFiles(-1);
+  }) );
+  context.subscriptions.push(vscode.commands.registerCommand('fileGroup.openEditorSelectionFilesColSplit', async (...args) => {
+    await openEditorSelectionFiles(splitViewColumn());
+  }) );
+  context.subscriptions.push(vscode.commands.registerCommand('fileGroup.openEditorSelectionFilesColSide', async (...args) => {
+    await openEditorSelectionFiles(-2);
+  }) );
+  for (let i = 1; i < 5; ++i) {
+    context.subscriptions.push(vscode.commands.registerCommand(`fileGroup.openEditorSelectionFilesCol${i}`, async (...args) => {
+      await openEditorSelectionFiles(i);
+    }) );
+  }
+  context.subscriptions.push(vscode.commands.registerCommand('fileGroup.openEditorSelectionFilesScript', async (...args) => {
+    let filePaths = getEditorSelectionFiles();
+    if (!filePaths) { return; }
+    let fileURIs = filePaths.map(t => vscode.Uri.file(t));
+    await vscode.commands.executeCommand('fileGroup.script', fileURIs[0], fileURIs);  // simulate Explorer View callback
+  }) );
   function getScripts() {
     let config = vscode.workspace.getConfiguration(extensionShortName);
     let scripts = config.get('scripts'); // there is always default value: {}
@@ -245,7 +284,7 @@ function activate(context) {
       vscode.window.showInformationMessage('no script found');
       return;
     }
-    if (args.length === 1) {  // from keybinding
+    if (args.length <= 1) {  // from keybinding
       return;
     }
     let scriptKey = await new Promise(resolve => {
